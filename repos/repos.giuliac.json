@@ -15,12 +15,20 @@
       {
         "repo": "https://github.com/TheMuppets/proprietary_vendor_oneplus_sm8650-common",
         "branch": "lineage-23.2",
-        "name": "vendor/oneplus/sm8650-common"
+        "name": "vendor/oneplus/sm8650-common",
+        "binPath": []
+      },
+      {
+        "repo": "https://github.com/LineageOS/android_kernel_oneplus_sm8650-modules",
+        "branch": "lineage-23.2",
+        "name": "sm8650-modules",
+        "binPath": []
       },
       {
         "repo": "https://github.com/LineageOS/android_prebuilts_clang_kernel_linux-x86_clang-r416183b",
         "branch": "lineage-20.0",
-        "name": "clang"
+        "name": "clang",
+        "binPath": ["bin"]
       }
     ],
     "ccache": true,
