@@ -54,6 +54,9 @@ jobs:
       ccache: ${{ matrix.repos.ccache }}
       useAnykernel: ${{ matrix.repos.AnyKernel3.use }}
       release: ${{ matrix.repos.AnyKernel3.release }}
+      useBootImg: ${{ matrix.repos.bootImg.use }}
+      bootImgUrl: ${{ matrix.repos.bootImg.url }}
+      bootImgRelease: ${{ matrix.repos.bootImg.release }}
     steps:
       - name: "⭐ Install prerequisites"
         run: |
@@ -109,7 +112,7 @@ jobs:
             toolchain_branch=$(echo $toolchains | jq -r ".[$i].branch")
             # From archive
             toolchain_url=$(echo $toolchains | jq -r ".[$i].url")
-            
+
             echo $toolchain_url
             if [ -z "${toolchain_url:-}" ] || [ "$toolchain_url" = "null" ];  then
               git clone --recursive --depth=1 -j $(nproc) --branch $toolchain_branch $toolchain_repo $toolchain_name
@@ -181,7 +184,7 @@ jobs:
             fi
             args="$args $key=$value"
           done < <(jq -r '.externalCommand | to_entries[] | "\(.key)=\(.value)"' <<< "$params")
-        
+
           echo "🤔 $args"
           echo "ARCH=$ARCH" >> $GITHUB_OUTPUT
           echo "args=$args" >> $GITHUB_OUTPUT
@@ -305,6 +308,41 @@ jobs:
           cd AnyKernel3/
           zip -q -r "${{ env.anykernel }}.zip" *
 
+      - name: "📦 Pack boot.img (Magiskboot)"
+        if: ${{ env.useBootImg == 'true' }}
+        env:
+          arch: ${{ steps.generate-args.outputs.ARCH }}
+        run: |
+          wget -q https://github.com/topjohnwu/Magisk/releases/download/v27.0/Magisk-v27.0.apk -O magisk.apk
+          unzip -j magisk.apk lib/x86_64/libmagiskboot.so -d .
+          mv libmagiskboot.so magiskboot
+          chmod +x magiskboot
+
+          echo "⬇️ Downloading source boot.img..."
+          wget -q "${{ env.bootImgUrl }}" -O boot-source.img
+
+          ./magiskboot unpack boot-source.img
+
+          if [ -e "${{ env.OUT_DIR }}/arch/${{ env.arch }}/boot/Image" ]; then
+            cp -f ${{ env.OUT_DIR }}/arch/${{ env.arch }}/boot/Image kernel
+          elif [ -e "${{ env.OUT_DIR }}/arch/${{ env.arch }}/boot/Image.gz" ]; then
+            cp -f ${{ env.OUT_DIR }}/arch/${{ env.arch }}/boot/Image.gz kernel
+          fi
+
+          if [ -e "${{ env.OUT_DIR }}/arch/${{ env.arch }}/boot/dtb" ]; then
+            cp -f ${{ env.OUT_DIR }}/arch/${{ env.arch }}/boot/dtb dtb
+          fi
+
+          ./magiskboot repack boot-source.img boot.img
+          echo "✅ boot.img packed successfully!"
+
+      - name: "💾 Upload boot.img"
+        uses: actions/upload-artifact@v4
+        if: ${{ env.useBootImg == 'true' }}
+        with:
+          name: "boot-${{ env.KERNEL_DEVICE }}-${{ env.KERNEL_NAME }}_${{ env.builddate }}"
+          path: boot.img
+
       - name: "💾 Upload AnyKernel3 image => (${{ env.builddate }})"
         uses: actions/upload-artifact@v4
         if: ${{ env.useAnykernel == 'true' }}
@@ -315,8 +353,11 @@ jobs:
       - name: 🧧 Create GitHub Release => (${{ env.builddate }})
         continue-on-error: true
         uses: softprops/action-gh-release@v2
-        if: ${{ env.useAnykernel == 'true' && env.release == 'true' }}
+        # 只要开启了 AnyKernel3 或 bootImg 的 release，就触发
+        if: ${{ (env.useAnykernel == 'true' && env.release == 'true') || (env.useBootImg == 'true' && env.bootImgRelease == 'true') }}
         with:
           tag_name: v${{ env.builddate }}.${{ github.run_number }}
-          files: "${{ env.WORKSPACE }}/${{ env.KERNEL_DEVICE }}-${{ env.KERNEL_NAME }}_${{ env.builddate }}.zip"
+          files: |
+            ${{ env.WORKSPACE }}/${{ env.KERNEL_DEVICE }}-${{ env.KERNEL_NAME }}_${{ env.builddate }}.zip
+            ${{ env.WORKSPACE }}/boot.img
           generate_release_notes: true
