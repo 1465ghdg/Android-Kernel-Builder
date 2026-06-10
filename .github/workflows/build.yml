@@ -190,11 +190,13 @@ jobs:
           echo "ARCH=$ARCH" >> $GITHUB_OUTPUT
           echo "args=$args" >> $GITHUB_OUTPUT
 
-      - name: "🔧 Fix Kconfig path"
+      - name: "🔧 Fix source code errors"
         working-directory: ${{ env.KERNEL_NAME }}
         run: |
           sed -i 's|drivers/base/kernelFwUpdate/Kconfig|drivers/base/firmware_loader/Kconfig|g' drivers/base/Kconfig
-          echo "✅ Fixed Kconfig path: kernelFwUpdate -> firmware_loader"
+          sed -i 's/mhi_misc_dbs_pending/mhi_special_dbs_pending/g' drivers/bus/mhi/host/pm.c
+
+          echo "✅ Fixed all known source code errors"
 
       - name: "😋 Update KernelSU"
         working-directory: ${{ env.KERNEL_NAME }}
