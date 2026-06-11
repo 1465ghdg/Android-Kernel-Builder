@@ -15,7 +15,7 @@
       {
         "repo": "https://github.com/TheMuppets/proprietary_vendor_oneplus_sm8650-common",
         "branch": "lineage-23.2",
-        "name": "vendor/oneplus/sm8650-common",
+        "name": "LineageKernel-KernelSU-Next/vendor/oneplus/sm8650-common",
         "binPath": []
       },
       {
