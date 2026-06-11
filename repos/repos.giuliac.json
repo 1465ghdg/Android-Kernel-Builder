@@ -5,7 +5,7 @@
       "repo": "https://github.com/LineageOS/android_kernel_oneplus_sm8650",
       "branch": "lineage-23.2",
       "device": "giuliac",
-      "defconfig": "defconfig"
+      "defconfig": "gki_defconfig vendor/pineapple_GKI.config vendor/pineapple_consolidate.config vendor/oplus/pineapple_GKI.config"
     },
     "kernelSU": {
       "withKernelSU": true,
