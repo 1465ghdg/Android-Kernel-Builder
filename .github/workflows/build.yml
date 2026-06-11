@@ -243,7 +243,7 @@ jobs:
           echo "CONFIG_HAVE_KPROBES=y" >> "$DEFCONFIG_PATH"
           echo "CONFIG_KPROBE_EVENTS=y" >> "$DEFCONFIG_PATH"
 
-          cat "$BASE_DEFCONFIG"
+          cat "$DEFCONFIG_PATH"
 
       - name: "👍 Make defconfig"
         working-directory: ${{ env.KERNEL_NAME }}
