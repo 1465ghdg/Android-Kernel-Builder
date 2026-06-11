@@ -234,11 +234,16 @@ jobs:
           ;;
           esac
 
-          echo -e "CONFIG_KPROBES=y" >> arch/${{ env.arch }}/configs/${{ env.DEFCONFIG_NAME }}
-          echo -e "CONFIG_HAVE_KPROBES=y" >> arch/${{ env.arch }}/configs/${{ env.DEFCONFIG_NAME }}
-          echo -e "CONFIG_KPROBE_EVENTS=y" >> arch/${{ env.arch }}/configs/${{ env.DEFCONFIG_NAME }}
+          BASE_DEFCONFIG=$(echo "${{ env.DEFCONFIG_NAME }}" | cut -d' ' -f1)
+          DEFCONFIG_PATH="arch/${{ env.arch }}/configs/$BASE_DEFCONFIG"
 
-          cat arch/${{ env.arch }}/configs/${{ env.DEFCONFIG_NAME }}
+          echo "📝 Appending KSU configs to: $DEFCONFIG_PATH"
+
+          echo "CONFIG_KPROBES=y" >> "$DEFCONFIG_PATH"
+          echo "CONFIG_HAVE_KPROBES=y" >> "$DEFCONFIG_PATH"
+          echo "CONFIG_KPROBE_EVENTS=y" >> "$DEFCONFIG_PATH"
+
+          cat "$BASE_DEFCONFIG"
 
       - name: "👍 Make defconfig"
         working-directory: ${{ env.KERNEL_NAME }}
