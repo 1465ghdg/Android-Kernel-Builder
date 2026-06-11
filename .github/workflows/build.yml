@@ -195,12 +195,8 @@ jobs:
         run: |
           sed -i 's|drivers/base/kernelFwUpdate/Kconfig|drivers/base/firmware_loader/Kconfig|g' drivers/base/Kconfig
           sed -i 's/mhi_misc_dbs_pending/mhi_special_dbs_pending/g' drivers/bus/mhi/host/pm.c
-          sed -i '/^#else$/,/^#endif.*CONFIG_MHI_BUS_MISC/{
-                      /^[a-zA-Z_].*(/ {
-                        /^static/! s/^/static inline /
-                      }
-                    }' include/linux/mhi_misc.h
-
+          sed -i '/^#else$/,/^#endif/ { /^[a-zA-Z_].*mhi_.*(/ { /^static/! s/^/static inline / } }' include/linux/mhi_misc.h
+          sed -i '/^void mhi_force_reg_write/s/^/static inline /' drivers/bus/mhi/host/misc.h
           echo "✅ Fixed all known source code errors"
 
       - name: "😋 Update KernelSU"
