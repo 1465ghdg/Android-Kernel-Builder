@@ -149,14 +149,13 @@ jobs:
         id: generate-args
         env:
           params: "${{ toJSON(matrix.repos.params) }}"
-          THREAD: $(nproc --all)
         run: |
           echo "🤔 PATH Variable: $PATH"
 
-          ARCH=$(echo $params | jq -r ".ARCH")
-          CC=$(echo $params | jq -r ".CC")
+          ARCH=$(echo "$params" | jq -r ".ARCH")
+          CC=$(echo "$params" | jq -r ".CC")
 
-          args="-j${{ env.THREAD }}"
+          args=""
           if [ -n "${{ env.OUT_DIR }}" ]; then
             mkdir -p ${{ env.OUT_DIR }} && args="$args O=${{ env.OUT_DIR }}"
           fi
@@ -169,7 +168,7 @@ jobs:
               CC=${{ env.WORKSPACE }}/$CC
             fi
 
-            if [ ${{ env.ccache }} = true ]; then
+            if [ "${{ env.ccache }}" = "true" ]; then
               args="$args CC=\"ccache $CC\""
             else
               args="$args CC=$CC"
@@ -177,7 +176,7 @@ jobs:
           fi
           while read -r externalCommand; do
             key=$(echo "$externalCommand" | cut -d= -f1)
-            value=$(echo "$externalCommand" | cut -d= -f2)
+            value=$(echo "$externalCommand" | cut -d= -f2-)
             if [[ "$value" == *"/"* ]]; then
               value="${{ env.WORKSPACE }}/$value"
             fi
@@ -186,6 +185,7 @@ jobs:
 
           echo "🤔 $args"
           echo "ARCH=$ARCH" >> $GITHUB_OUTPUT
+          echo "threads=$(nproc --all)" >> $GITHUB_OUTPUT
           echo "args=$args" >> $GITHUB_OUTPUT
 
       - name: "🔧 Fix source code errors"
@@ -264,9 +264,10 @@ jobs:
         working-directory: ${{ env.KERNEL_NAME }}
         env:
           args: ${{ steps.generate-args.outputs.args }}
+          threads: ${{ steps.generate-args.outputs.threads }}
         run: |
           echo "PATH Variable: $PATH"
-          make ${{ env.args }}
+          make -j${{ env.threads }} ${{ env.args }}
 
       - name: "💛 Upload Image"
         uses: actions/upload-artifact@v4
