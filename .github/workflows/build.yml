@@ -207,6 +207,8 @@ jobs:
           arch: ${{ steps.generate-args.outputs.ARCH }}
         if: ${{ env.withKernelSU == 'true' }}
         run: |
+          set -o pipefail
+
           if [ -d "./KernelSU" ]; then
             rm -rf "./KernelSU"
           fi
@@ -217,21 +219,26 @@ jobs:
           case "${{ env.kernelSUFork }}" in
           "KernelSU")
             echo "Installing KernelSU..."
-            curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
+            curl -fsSL "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
           ;;
           "KernelSU-Next")
             echo "Installing KernelSU Next..."
-            curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -
+            curl -fsSL "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -
           ;;
           "KernelSU-Next-SuSFS")
             echo "Installing KernelSU Next with SuSFS..."
-            curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs
+            curl -fsSL "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs
           ;;
           *)
             echo "Installing default KernelSU version..."
-            curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s main
+            curl -fsSL "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s main
           ;;
           esac
+
+          if [ ! -e "./drivers/kernelsu/Kconfig" ]; then
+            echo "❌ KernelSU setup failed: drivers/kernelsu/Kconfig is missing"
+            exit 1
+          fi
 
           BASE_DEFCONFIG=$(echo "${{ env.DEFCONFIG_NAME }}" | cut -d' ' -f1)
           DEFCONFIG_PATH="arch/${{ env.arch }}/configs/$BASE_DEFCONFIG"
