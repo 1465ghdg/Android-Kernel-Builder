@@ -337,8 +337,19 @@ jobs:
           mv libmagiskboot.so magiskboot
           chmod +x magiskboot
 
-          echo "⬇️ Downloading source boot.img..."
-          wget -q "${{ env.bootImgUrl }}" -O boot-source.img
+          BOOTIMG_URL="${{ env.bootImgUrl }}"
+          if [ -z "$BOOTIMG_URL" ] || [ "$BOOTIMG_URL" = "null" ]; then
+            echo "🔍 Resolving latest boot.img for ${KERNEL_DEVICE}..."
+            BOOTIMG_URL=$(curl -fsSL "https://download.lineageos.org/api/v2/devices/${KERNEL_DEVICE}/builds" \
+              | jq -r 'sort_by(.datetime) | last | .files[] | select(.filename == "boot.img") | .url')
+          fi
+          if [ -z "$BOOTIMG_URL" ] || [ "$BOOTIMG_URL" = "null" ]; then
+            echo "❌ Failed to resolve boot.img URL for ${KERNEL_DEVICE}"
+            exit 1
+          fi
+
+          echo "⬇️ Downloading source boot.img: $BOOTIMG_URL"
+          wget -q "$BOOTIMG_URL" -O boot-source.img
 
           ./magiskboot unpack boot-source.img
 

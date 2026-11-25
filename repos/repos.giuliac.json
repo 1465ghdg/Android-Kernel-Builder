@@ -50,7 +50,7 @@
     },
     "bootImg": {
       "use": true,
-      "url": "https://mirrorbits.lineageos.org/full/giuliac/20260609/boot.img",
+      "url": "",
       "release": true
     }
   }
