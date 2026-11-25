@@ -240,16 +240,16 @@ jobs:
             exit 1
           fi
 
-          BASE_DEFCONFIG=$(echo "${{ env.DEFCONFIG_NAME }}" | cut -d' ' -f1)
-          DEFCONFIG_PATH="arch/${{ env.arch }}/configs/$BASE_DEFCONFIG"
+          KSU_CONFIG="arch/${{ env.arch }}/configs/kernelsu.config"
+          echo "📝 Writing KSU configs to: $KSU_CONFIG"
 
-          echo "📝 Appending KSU configs to: $DEFCONFIG_PATH"
+          {
+            echo "CONFIG_KPROBES=y"
+            echo "CONFIG_HAVE_KPROBES=y"
+            echo "CONFIG_KPROBE_EVENTS=y"
+          } > "$KSU_CONFIG"
 
-          echo "CONFIG_KPROBES=y" >> "$DEFCONFIG_PATH"
-          echo "CONFIG_HAVE_KPROBES=y" >> "$DEFCONFIG_PATH"
-          echo "CONFIG_KPROBE_EVENTS=y" >> "$DEFCONFIG_PATH"
-
-          cat "$DEFCONFIG_PATH"
+          cat "$KSU_CONFIG"
 
       - name: "👍 Make defconfig"
         working-directory: ${{ env.KERNEL_NAME }}
@@ -258,7 +258,13 @@ jobs:
           arch: ${{ steps.generate-args.outputs.ARCH }}
         run: |
           echo "PATH Variable: $PATH"
-          make ${{ env.args }} ${{ env.DEFCONFIG_NAME }}
+
+          KSU_CONFIG=""
+          if [ "${{ env.withKernelSU }}" = "true" ]; then
+            KSU_CONFIG="arch/${{ env.arch }}/configs/kernelsu.config"
+          fi
+
+          make ${{ env.args }} ${{ env.DEFCONFIG_NAME }} $KSU_CONFIG
 
       - name: "🎶 Build kernel"
         working-directory: ${{ env.KERNEL_NAME }}
