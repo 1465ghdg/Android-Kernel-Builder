@@ -76,12 +76,10 @@ jobs:
         if: ${{ env.ccache == 'true' }}
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.ccache
-            ${{ env.OUT_DIR }}
-          key: ccache-${{ env.KERNEL_NAME }}-${{ steps.ccache_key.outputs.CACHE_KEY }}-${{ env.builddate }}
+          path: ~/.ccache
+          key: ccache-v1-${{ env.KERNEL_NAME }}-${{ steps.ccache_key.outputs.CACHE_KEY }}-${{ env.builddate }}
           restore-keys: |
-            ccache-${{ env.KERNEL_NAME }}-${{ steps.ccache_key.outputs.CACHE_KEY }}-${{ env.builddate }}
+            ccache-v1-${{ env.KERNEL_NAME }}-${{ steps.ccache_key.outputs.CACHE_KEY }}-
 
       - name: "⏰ Setup Anykernel3"
         if: ${{ env.useAnykernel == 'true' }}
