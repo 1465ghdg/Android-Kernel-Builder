@@ -262,9 +262,10 @@ jobs:
         run: |
           echo "PATH Variable: $PATH"
 
+          # *.config goals are resolved relative to arch/<arch>/configs/
           KSU_CONFIG=""
           if [ "${{ env.withKernelSU }}" = "true" ]; then
-            KSU_CONFIG="arch/${{ env.arch }}/configs/kernelsu.config"
+            KSU_CONFIG="kernelsu.config"
           fi
 
           make ${{ env.args }} ${{ env.DEFCONFIG_NAME }} $KSU_CONFIG
