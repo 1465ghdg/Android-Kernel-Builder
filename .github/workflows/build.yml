@@ -6,6 +6,9 @@ env:
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   Set-repos:
     name: "🐂 Parse repos.json"
@@ -393,7 +396,6 @@ jobs:
           path: AnyKernel3/*
 
       - name: 🧧 Create GitHub Release => (${{ env.builddate }})
-        continue-on-error: true
         uses: softprops/action-gh-release@v2
         # 只要开启了 AnyKernel3 或 bootImg 的 release，就触发
         if: ${{ (env.useAnykernel == 'true' && env.release == 'true') || (env.useBootImg == 'true' && env.bootImgRelease == 'true') }}
