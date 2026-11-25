@@ -18,7 +18,7 @@ jobs:
       builddate: ${{ steps.generate-builddate.outputs.builddate }}
     steps:
       - name: "😄 Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "😆 Generate Matrix"
         id: generate-matrix
@@ -77,7 +77,7 @@ jobs:
 
       - name: "🚅 Cache ccache files"
         if: ${{ env.ccache == 'true' }}
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.ccache
           key: ccache-v1-${{ env.KERNEL_NAME }}-${{ steps.ccache_key.outputs.CACHE_KEY }}-${{ env.builddate }}
@@ -279,7 +279,7 @@ jobs:
           make -j${{ env.threads }} ${{ env.args }}
 
       - name: "💛 Upload Image"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         env:
           arch: ${{ steps.generate-args.outputs.ARCH }}
         with:
@@ -289,7 +289,7 @@ jobs:
           retention-days: 7
 
       - name: "💙 Upload Image.gz"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         env:
           arch: ${{ steps.generate-args.outputs.ARCH }}
         with:
@@ -299,7 +299,7 @@ jobs:
           retention-days: 7
 
       - name: "💜 Upload dtb"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         env:
           arch: ${{ steps.generate-args.outputs.ARCH }}
         with:
@@ -309,7 +309,7 @@ jobs:
           retention-days: 7
 
       - name: "❤️ Upload dtbo.img"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         env:
           arch: ${{ steps.generate-args.outputs.ARCH }}
         with:
@@ -382,21 +382,21 @@ jobs:
           echo "✅ boot.img packed successfully!"
 
       - name: "💾 Upload boot.img"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ env.useBootImg == 'true' }}
         with:
           name: "boot-${{ env.KERNEL_DEVICE }}-${{ env.KERNEL_NAME }}_${{ env.builddate }}"
           path: boot.img
 
       - name: "💾 Upload AnyKernel3 image => (${{ env.builddate }})"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ env.useAnykernel == 'true' }}
         with:
           name: "${{ env.KERNEL_DEVICE }}-${{ env.KERNEL_NAME }}_${{ env.builddate }}"
           path: AnyKernel3/*
 
       - name: 🧧 Create GitHub Release => (${{ env.builddate }})
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         # 只要开启了 AnyKernel3 或 bootImg 的 release，就触发
         if: ${{ (env.useAnykernel == 'true' && env.release == 'true') || (env.useBootImg == 'true' && env.bootImgRelease == 'true') }}
         with:
